@@ -1,0 +1,4 @@
+name: DiscordJoinLeaveMessages
+version: '${project.version}'
+main: uk.untone.DiscordJoinLeaveMessages
+api-version: '1.21'
