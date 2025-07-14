@@ -1,0 +1,5 @@
+webhook-url: "https://discord.com/api/webhooks/your-webhook"
+death-webhook-url: ""
+show-timestamp: true
+show-uuid: false
+show-client-brand: false
