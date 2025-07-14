@@ -1,10 +1,9 @@
 package uk.untone;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import net.md_5.bungee.api.ChatColor;
 
 public final class DiscordJoinLeaveMessages extends JavaPlugin {
 
