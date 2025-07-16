@@ -26,7 +26,7 @@ public class PlayerListener implements Listener {
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
         embed.setTitle(player.getName() + " has joined the server");
         embed.setColor(Color.GREEN);
-        embed.setImage("https://mc-heads.net/avatar/" + player.getName());
+        embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
 
         DiscordWebhook hook = new DiscordWebhook(webhook);
         hook.setUsername(player.getName());
@@ -47,7 +47,7 @@ public class PlayerListener implements Listener {
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
         embed.setTitle(player.getName() + " has left the server");
         embed.setColor(Color.RED);
-        embed.setImage("https://mc-heads.net/avatar/" + player.getName());
+        embed.setThumbnaily("https://mc-heads.net/avatar/" + player.getName());
 
         DiscordWebhook hook = new DiscordWebhook(webhook);
         hook.setUsername(player.getName());
@@ -78,7 +78,7 @@ public class PlayerListener implements Listener {
 
         embed.setDescription(e.getDeathMessage());
         embed.setColor(Color.GRAY);
-        embed.setImage("https://mc-heads.net/avatar/" + player.getName());
+        embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
 
         DiscordWebhook hook = new DiscordWebhook(deathWebhook);
         hook.setUsername(player.getName());
