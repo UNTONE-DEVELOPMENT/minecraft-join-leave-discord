@@ -1,5 +1,6 @@
 package uk.untone;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,14 +10,53 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.awt.*;
 import java.io.IOException;
+import java.time.Instant;
 
 public class PlayerListener implements Listener {
-    public String webhook;
-    public String deathWebhook;
+    private final DiscordJoinLeaveMessages plugin;
 
-    PlayerListener(String webhook, String deathWebhook) {
-        this.webhook = webhook;
-        this.deathWebhook = deathWebhook;
+    PlayerListener(DiscordJoinLeaveMessages plugin) {
+        this.plugin = plugin;
+    }
+
+    private void sendWebhookAsync(DiscordWebhook hook) {
+        Bukkit.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+            try {
+                hook.execute();
+            } catch (IOException ex) {
+                plugin.getLogger().warning("Failed to send webhook: " + ex.getMessage());
+            }
+        });
+    }
+
+
+    public DiscordWebhook.EmbedObject prepareCommonEmbedContent(DiscordWebhook.EmbedObject embed, Player player) {
+        return prepareCommonEmbedContent(embed, player, false);
+    }
+
+    public DiscordWebhook.EmbedObject prepareCommonEmbedContent(DiscordWebhook.EmbedObject embed, Player player, boolean left) {
+        long time = Instant.now().getEpochSecond();
+
+        embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
+
+        if (plugin.getConfig().getBoolean("show-timestamp"))
+            embed.addField("Time", String.format("<t:%d:f>", time), false);
+        if (plugin.getConfig().getBoolean("show-uuid"))
+            embed.addField("Player UUID", "`" + player.getUniqueId() + "`", false);
+
+        int players = plugin.getServer().getOnlinePlayers().size() - (left ? 1 : 0); // if a player's just left, we need to subtract one, since that hasn't occured yet
+        embed.setFooter(players + "/" + plugin.getServer().getMaxPlayers() + " players online", null);
+
+        return embed;
+    }
+
+    public void sendHook(DiscordWebhook.EmbedObject embed, Player player, String url) {
+        DiscordWebhook hook = new DiscordWebhook(url);
+        hook.setUsername(player.getName());
+        hook.setAvatarUrl("https://mc-heads.net/avatar/" + player.getName());
+        hook.addEmbed(embed);
+
+        sendWebhookAsync(hook);
     }
 
     @EventHandler
@@ -26,18 +66,15 @@ public class PlayerListener implements Listener {
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
         embed.setTitle(player.getName() + " has joined the server");
         embed.setColor(Color.GREEN);
-        embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
 
-        DiscordWebhook hook = new DiscordWebhook(webhook);
-        hook.setUsername(player.getName());
-        hook.setAvatarUrl("https://mc-heads.net/avatar/" + player.getName());
-        hook.addEmbed(embed);
+        embed = prepareCommonEmbedContent(embed, player);
 
-        try {
-            hook.execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (plugin.getConfig().getBoolean("show-client-brand")) {
+            String brand = player.getClientBrandName() != null ? player.getClientBrandName() : "Unknown";
+            embed.addField("Client Brand", brand, false);
         }
+
+        sendHook(embed, player, plugin.getConfig().getString("webhook-url"));
     }
 
     @EventHandler
@@ -47,48 +84,23 @@ public class PlayerListener implements Listener {
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
         embed.setTitle(player.getName() + " has left the server");
         embed.setColor(Color.RED);
-        embed.setThumbnaily("https://mc-heads.net/avatar/" + player.getName());
 
-        DiscordWebhook hook = new DiscordWebhook(webhook);
-        hook.setUsername(player.getName());
-        hook.setAvatarUrl("https://mc-heads.net/avatar/" + player.getName());
-        hook.addEmbed(embed);
+        embed = prepareCommonEmbedContent(embed, player, true);
 
-        try {
-            hook.execute();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        sendHook(embed, player, plugin.getConfig().getString("webhook-url"));
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
-        if (deathWebhook == "") return;
-
         Player player = e.getEntity();
-        Player killer = player.getKiller();
+        if (plugin.getConfig().getString("death-webhook-url") == "") return;
 
         DiscordWebhook.EmbedObject embed = new DiscordWebhook.EmbedObject();
-
-        if (killer != null) {
-            embed.setTitle(player.getName() + " was killed by " + killer.getName());
-        } else {
-            embed.setTitle(player.getName() + " died");
-        }
-
-        embed.setDescription(e.getDeathMessage());
+        embed.setTitle(e.getDeathMessage());
         embed.setColor(Color.GRAY);
-        embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
 
-        DiscordWebhook hook = new DiscordWebhook(deathWebhook);
-        hook.setUsername(player.getName());
-        hook.setAvatarUrl("https://mc-heads.net/avatar/" + player.getName());
-        hook.addEmbed(embed);
+        embed = prepareCommonEmbedContent(embed, player);
 
-        try {
-            hook.execute();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        sendHook(embed, player, plugin.getConfig().getString("death-webhook-url"));
     }
 }
