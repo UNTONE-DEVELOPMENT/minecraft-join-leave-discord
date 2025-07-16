@@ -31,10 +31,10 @@ public class PlayerListener implements Listener {
 
 
     public DiscordWebhook.EmbedObject prepareCommonEmbedContent(DiscordWebhook.EmbedObject embed, Player player) {
-        return prepareCommonEmbedContent(embed, player, false);
+        return prepareCommonEmbedContent(embed, player, false, true);
     }
 
-    public DiscordWebhook.EmbedObject prepareCommonEmbedContent(DiscordWebhook.EmbedObject embed, Player player, boolean left) {
+    public DiscordWebhook.EmbedObject prepareCommonEmbedContent(DiscordWebhook.EmbedObject embed, Player player, boolean left, boolean showPlayers) {
         long time = Instant.now().getEpochSecond();
 
         embed.setThumbnail("https://mc-heads.net/avatar/" + player.getName());
@@ -85,7 +85,7 @@ public class PlayerListener implements Listener {
         embed.setTitle(player.getName() + " has left the server");
         embed.setColor(Color.RED);
 
-        embed = prepareCommonEmbedContent(embed, player, true);
+        embed = prepareCommonEmbedContent(embed, player, true, true);
 
         sendHook(embed, player, plugin.getConfig().getString("webhook-url"));
     }
@@ -99,7 +99,7 @@ public class PlayerListener implements Listener {
         embed.setTitle(e.getDeathMessage());
         embed.setColor(Color.GRAY);
 
-        embed = prepareCommonEmbedContent(embed, player);
+        embed = prepareCommonEmbedContent(embed, player, false, false);
 
         sendHook(embed, player, plugin.getConfig().getString("death-webhook-url"));
     }
