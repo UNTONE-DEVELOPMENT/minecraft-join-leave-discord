@@ -2,3 +2,9 @@ name: DiscordJoinLeaveMessages
 version: '${project.version}'
 main: uk.untone.DiscordJoinLeaveMessages
 api-version: '1.21'
+
+commands:
+  djlm:
+    description: Reloads the config
+    usage: /djlm reload
+    permission: djlm.reload
