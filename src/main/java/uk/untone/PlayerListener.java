@@ -44,9 +44,11 @@ public class PlayerListener implements Listener {
         if (plugin.getConfig().getBoolean("show-uuid"))
             embed.addField("Player UUID", "`" + player.getUniqueId() + "`", false);
 
-        int players = plugin.getServer().getOnlinePlayers().size() - (left ? 1 : 0); // if a player's just left, we need to subtract one, since that hasn't occured yet
-        embed.setFooter(players + "/" + plugin.getServer().getMaxPlayers() + " players online", null);
-
+        if(showPlayers) {
+            int players = plugin.getServer().getOnlinePlayers().size() - (left ? 1 : 0); // if a player's just left, we need to subtract one, since that hasn't occured yet
+            embed.setFooter(players + "/" + plugin.getServer().getMaxPlayers() + " players online", null);
+        }
+        
         return embed;
     }
 
